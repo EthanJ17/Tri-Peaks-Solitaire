@@ -9,6 +9,7 @@ function Card(suit, rank){
 	this.rank = rank;
 	this.suit = suit;
 	clickable = false;
+	var cardImage = new Image(71,101);
 }
 
 function populateDeck(){
@@ -16,6 +17,7 @@ function populateDeck(){
 	for (i = 0; i < suits.length; i++){
 		for (j = 0; j < ranks.length; j++){
 			deck[(i * ranks.length) + j] = new Card(suits[i], ranks[j]);
+			setImage(deck[(i * ranks.length) + j]);
 		}
 	}
 }
@@ -29,6 +31,10 @@ Array.prototype.shuffle = function(){
 		deck[j] = deck[i];
 		deck[i] = temp;
 	}
+}
+
+function setImage(Card){
+	cardImage.src = "" + suit + rank + ".gif";	
 }
 
 function layout(){
