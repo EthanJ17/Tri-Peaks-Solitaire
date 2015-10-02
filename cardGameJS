@@ -32,27 +32,36 @@ function shuffle(tempDeck){
 		
 	}
 }
-		
+
+function displayDeck(deck) {
+	var c = document.getElementById('container');
+	console.log(deck);
+	i=1;
+	deck.forEach(function(e) {
+		if((i <= 18)||(i>28&&i<52)){
+			var card = '<div id="card_'+i+'" onclick="flipCard(this,\''+e.suit+'\',\''+e.rank+'\',\''+i+'\')"><img src="images/b2fv.gif" ></div>';
+		}
+		else{
+			var card = '<div id="card_'+i+'" onclick="flipCard(this,\''+e.suit+'\',\''+e.rank+'\',\''+i+'\')"><img src="images/'+e.suit+e.rank+'.gif" ></div>';
+		}
+		c.innerHTML += card;
+		i++;
+	});
+}
+	
+function flipCard(card, suit, rank, num) {
+	var c = document.getElementById('container');
+	var flipped = '<div id="card_'+num+'" ><img src="images/'+suit+rank+'.gif" ></div>';
+	//onclick="flipCard(this,\''+suit+'\',\''+rank+'\',\''+num+'\')"
+	c.innerHTML += flipped;
+	console.log(suit+rank+' '+num);
+}
+	
 function newGame(){
 	var deck = [];
 	populateDeck(deck);
 	shuffle(deck);
 	displayDeck(deck);
-}
-
-function displayDeck(deck) {
-	var c = document.getElementById('container');
 	
-	console.log(deck);
-	i=1;
-	
-	deck.forEach(function(e) {
-		var card = '<div id="card_'+i+'" onclick="flipCard(this,\''+e.suit+'\',\''+e.rank+'\')"><img src="images/'+e.suit+e.rank+'.gif" ></div>';
-		c.innerHTML += card;
-		i++;
-	});
-}
-
-function flipCard(card, suit, rank) {
-	//this is where most things will occur	
+	var playCard = deck[51];
 }
