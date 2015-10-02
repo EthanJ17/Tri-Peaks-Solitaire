@@ -16,7 +16,7 @@ div#card_1{
 	position:absolute;
 	top:100px;
 	left:106px;
-	z-index:2;
+	z-index:1;
 }
 div#card_2{
 	background-image: url(images/b2fv.gif);
@@ -25,7 +25,7 @@ div#card_2{
 	position:absolute;
 	top:100px;
 	left:319px;
-	z-index:2;
+	z-index:1;
 }
 div#card_3{
 	background-image: url(images/b2fv.gif);
@@ -34,7 +34,7 @@ div#card_3{
 	position:absolute;
 	top:100px;
 	left:532px;
-	z-index:2;
+	z-index:1;
 }
 
 /*---------------Begin 2nd Row---------------*/
