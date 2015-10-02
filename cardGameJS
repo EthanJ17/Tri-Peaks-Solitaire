@@ -45,13 +45,12 @@ function displayDeck(deck) {
 	
 	console.log(deck);
 	i=1;
+	
 	deck.forEach(function(e) {
 		var card = '<div id="card_'+i+'" onclick="flipCard(this,\''+e.suit+'\',\''+e.rank+'\')"><img src="images/'+e.suit+e.rank+'.gif" ></div>';
-		//c.innerHTML += e.rank + e.suit+ ' ';
 		c.innerHTML += card;
 		i++;
 	});
-	//c.innerHTML += "<br><br>"
 }
 
 function flipCard(card, suit, rank) {
