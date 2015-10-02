@@ -1,47 +1,55 @@
-var deck = new Array(52);
-var ranks = ("1", "2", "3", "4", "5", "6", "7", 
-			"8", "9", "10", "j", "q", "k");
-var suits = ("h","d", "c", "s");
-boolean clickable;
-			
+//window.alert("I'm working properly..I think");
+
+	
 function Card(suit, rank){
-	var output = '';
 	this.rank = rank;
 	this.suit = suit;
-	clickable = false;
-	var cardImage = new Image(71,101);
 }
 
-function populateDeck(){
-	var i, j;
+function populateDeck(tempDeck){
+	var ranks = ["1", "2", "3", "4", "5", "6", "7", 
+	"8", "9", "10", "j", "q", "k"];
+	var suits = ["h","d", "c", "s"];
+	var i;
+	var j;
 	for (i = 0; i < suits.length; i++){
 		for (j = 0; j < ranks.length; j++){
-			deck[(i * ranks.length) + j] = new Card(suits[i], ranks[j]);
-			setImage(deck[(i * ranks.length) + j]);
+			var temp = new Card(suits[i], ranks[j]);
+			tempDeck.push(temp);
+			console.log(suits[i]+' '+ranks[j]);
 		}
 	}
 }
 			
-Array.prototype.shuffle = function(){
-	int i;
-	int j;
-	for(i = 0; i < deck.length; i++){
-		j = Math.floor(Math.random() * i + 1);
-		temp = deck[j];
-		deck[j] = deck[i];
-		deck[i] = temp;
+function shuffle(tempDeck){
+	var i;
+	var j;
+	for(i = 0; i < tempDeck.length; i++){
+		j = Math.floor(Math.random() * i );
+		temp = tempDeck[j];
+		tempDeck[j] = tempDeck[i];
+		tempDeck[i] = temp;
+		
 	}
 }
-
-function setImage(Card){
-	cardImage.src = "" + suit + rank + ".gif";	
-}
-
-function layout(){
-
-}
-			
+		
 function newGame(){
-	populateDeck();
-	deck.shuffle();
+	var deck = [];
+	populateDeck(deck);
+	shuffle(deck);
+	displayDeck(deck);
+}
+
+function displayDeck(deck) {
+	var c = document.getElementById('container');
+	
+	console.log(deck);
+	i=1;
+	deck.forEach(function(e) {
+		var card = '<div id="card_'+i+'"><img src="images/'+e.suit+e.rank+'.gif"></div>';
+		//c.innerHTML += e.rank + e.suit+ ' ';
+		c.innerHTML += card;
+		i++;
+	});
+	//c.innerHTML += "<br><br>"
 }
