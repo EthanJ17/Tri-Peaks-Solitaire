@@ -8,7 +8,6 @@
 		<div id="container"></div>
 		
 		<script type="text/javascript" src="cardGameJS.js"></script>
-		<script>newGame()</script>
 		
 	</body>
 </html>
