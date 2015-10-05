@@ -1,12 +1,25 @@
 //window.alert("I'm working properly..I think");
+var deck = []; // Deck for when game begins
+newGame();
+var backupDeck = copy(deck);
+var restartDeck = [];
 
-	
+var playCard = deck[51];
+var drawCard = deck[50];
+var cardsDrawn = 0;
+var topCardsClicked = 0;
+var combo = false;
+var comboNum = 0;
+var score = 0;
+
 function Card(suit, rank){
 	this.rank = rank;
 	this.suit = suit;
+	var clickable;
+	var clicked;
 }
 
-function populateDeck(tempDeck){
+function populateDeck(){
 	var ranks = ["1", "2", "3", "4", "5", "6", "7", 
 	"8", "9", "10", "11", "12", "13"];
 	var suits = ["h","d", "c", "s"];
@@ -15,53 +28,335 @@ function populateDeck(tempDeck){
 	for (i = 0; i < suits.length; i++){
 		for (j = 0; j < ranks.length; j++){
 			var temp = new Card(suits[i], ranks[j]);
-			tempDeck.push(temp);
+			deck.push(temp);
 			console.log(suits[i]+' '+ranks[j]);
 		}
 	}
 }
 			
-function shuffle(tempDeck){
+function shuffle(){
 	var i;
 	var j;
-	for(i = 0; i < tempDeck.length; i++){
+	for(i = 0; i < deck.length; i++){
 		j = Math.floor(Math.random() * i );
-		temp = tempDeck[j];
-		tempDeck[j] = tempDeck[i];
-		tempDeck[i] = temp;
+		temp = deck[j];
+		deck[j] = deck[i];
+		deck[i] = temp;
 		
 	}
 }
 
-function displayDeck(deck) {
+function displayDeck() {
 	var c = document.getElementById('container');
+	var i;
+	
 	console.log(deck);
-	i=1;
-	deck.forEach(function(e) {
-		if((i <= 18)||(i>28&&i<52)){
-			var card = '<div id="card_'+i+'" onclick="flipCard(this,\''+e.suit+'\',\''+e.rank+'\',\''+i+'\')"><img src="images/b2fv.gif" ></div>';
+	
+	var replayButton = '<div id="replayButton"><button type="button" onclick="replayGame()">Replay Game</button></div>';
+	var newGameButton = '<div id="newGameButton"><button type="button" onclick="location.reload()">New Game</button></div>';
+	var scoreDisplay = '<div id="scoreDisplay">Score: </div>';
+	c.innerHTML += replayButton;
+	c.innerHTML += newGameButton;
+	c.innerHTML += scoreDisplay;
+	
+	for(i=0; i<52; i++){
+		if(i < 18||(i > 27 && i < 50)){
+			deck[i].clickable = false;
+			deck[i].clicked = false;
+
+			//var card = '<div id="card_'+(i+1)+'" onclick="clickCard(this,\''+deck[i].suit+'\',\''+deck[i].rank+'\',\''+i+'\')"><img src="images/b2fv.gif" ></div>';
+			var card = '<div id="card_'+(i+1)+'" onclick="clickCard('+i+')"><img src="images/b2fv.gif" ></div>';
+			
+		}
+		
+		else if(i==50){
+			deck[i].clickable = true;
+			deck[i].clicked = false;
+			var card = '<div id="card_'+(i+1)+'" onclick="clickCard('+i+')"><img src="images/b2fv.gif" ></div>';
+			//var card = '<div id="card_'+(i+1)+'" onclick="clickCard(this,\''+deck[i].suit+'\',\''+deck[i].rank+'\',\''+i+'\')"><img src="images/b2fv.gif" ></div>';
 		}
 		else{
-			var card = '<div id="card_'+i+'" onclick="flipCard(this,\''+e.suit+'\',\''+e.rank+'\',\''+i+'\')"><img src="images/'+e.suit+e.rank+'.gif" ></div>';
+			deck[i].clickable = true;
+			deck[i].clicked = false;
+
+			var card = '<div id="card_'+(i+1)+'" onclick="clickCard('+i+')"><img src="images/'+deck[i].suit+deck[i].rank+'.gif" ></div>';
+			//var card = '<div id="card_'+(i+1)+'" onclick="clickCard(this,\''+deck[i].suit+'\',\''+deck[i].rank+'\',\''+i+'\')"><img src="images/'+deck[i].suit+deck[i].rank+'.gif" ></div>';
 		}
 		c.innerHTML += card;
-		i++;
-	});
+	}
 }
 	
-function flipCard(card, suit, rank, num) {
+function clickCard(num) {
+
 	var c = document.getElementById('container');
-	var flipped = '<div id="card_'+num+'" ><img src="images/'+suit+rank+'.gif" ></div>';
-	//onclick="flipCard(this,\''+suit+'\',\''+rank+'\',\''+num+'\')"
-	c.innerHTML += flipped;
-	console.log(suit+rank+' '+num);
+	var playCardRank = playCard.rank;
+	console.log('Clicked card_'+(num+1) + ' ' + 'Suit:'+deck[num].suit+ ' Rank: '+deck[num].rank);
+	
+	//check if card is clickable AND it is +/- 1 from play card or it is the draw card
+	if((deck[num].clickable==true)&&
+	(((Math.abs((deck[num].rank%13)-(playCardRank%13))==1)||(deck[num].rank==13&&playCardRank==12)||(deck[num].rank==12&&playCardRank==13))
+		||(num==(50-cardsDrawn)))){
+		
+		deck[num].clicked = true;
+		deck[num].clickable = false;
+
+		document.getElementById('card_'+(num+1)).innerHTML = "";
+		hideCard(num+1);
+		
+		if(num==(50-cardsDrawn)){ //card is draw card
+			
+			combo = false;
+			comboNum = 0;
+			cardsDrawn++; //increment # of cards drawn
+			deck[50-cardsDrawn].clickable = true;
+			if(cardsDrawn<24){ //there are still cards to draw from
+				//set draw card suit and rank
+				deck[50].suit = deck[50-cardsDrawn].suit; 
+				deck[50].rank = deck[50-cardsDrawn].rank;
+				//set play card suit and rank
+				deck[51].suit = deck[50-cardsDrawn].suit;
+				deck[51].rank = deck[50-cardsDrawn].rank;
+				c.innerHTML += '<div id="card_'+(52)+'" ><img src="images/'+deck[51].suit+deck[51].rank+'.gif" ></div>';
+				
+			}
+		}
+		else{ //card is from peak layout
+			combo = true;
+			comboNum++;
+			topCardsClicked++;
+			if(comboNum==1){
+				score += 100;
+			}
+			else if(comboNum > 1){
+				score += 200;
+			}
+		
+			deck[51].suit = deck[num].suit; //set new play card suit
+			deck[51].rank = deck[num].rank; //set new play card rank
+
+			c.innerHTML += '<div id="card_'+52+'" ><img src="images/'+deck[num].suit+deck[num].rank+'.gif" ></div>'; //change play card image to match new play card
+			
+			//Deal with 4th row
+			if(num>17&&num<28){
+				
+				if(num != 27 && deck[num+1].clicked==true){
+					
+					deck[(num-9)].clickable = true;
+					//document.getElementById('card_'+(num-8)).innerHTML += '<div id="card_'+(num-8)+'" onclick="clickCard('+(num-9)+')" ><img src="images/'+deck[num-9].suit+deck[num-9].rank+'.gif" ></div>';
+					//document.getElementById('card_'+(num-8)).backgroundImage += '<img src="images/'+deck[num-9].suit+deck[num-9].rank+'.gif" >';
+					//c.innerHTML += document.getElementById('card_'+(num-8)).style.backgroundImage="url(images/c9.gif)";
+					//c.innerHTML += document.getElementById('card_'+(num-8));
+					console.log("card_"+(num-8)+" is now available");
+					
+					var img = document.createElement("IMG");
+					img.src = "images/"+deck[num-9].suit+deck[num-9].rank+".gif";
+					document.getElementById('card_'+(num-8)).appendChild(img);
+					var imageDiv = document.getElementById('card_'+(num-8));
+					imageDiv.replaceChild(img, imageDiv.childNodes[0]);
+				}
+				if(num != 18 && deck[num-1].clicked == true){
+					
+					deck[(num-10)].clickable = true;
+					console.log("card_"+(num-9)+" is now available");
+					
+					var img = document.createElement("IMG");
+					img.src = "images/"+deck[num-10].suit+deck[num-10].rank+".gif";
+					document.getElementById('card_'+(num-9)).appendChild(img);
+					var imageDiv = document.getElementById('card_'+(num-9));
+					imageDiv.replaceChild(img, imageDiv.childNodes[0]);
+				}
+			}
+			
+			//Deal with 3rd row
+			else if(num>8&&num<12){
+
+				if(num != 11 && deck[num+1].clicked == true){
+					
+					deck[(num-6)].clickable = true;
+					//c.innerHTML += '<div id="card_'+(num-5)+'" onclick="clickCard('+(num-6)+')"><img src="images/'+deck[num-6].suit+deck[num-6].rank+'.gif" ></div>';
+					var img = document.createElement("IMG");
+					img.src = "images/"+deck[num-6].suit+deck[num-6].rank+".gif";
+					document.getElementById('card_'+(num-5)).appendChild(img);
+					var imageDiv = document.getElementById('card_'+(num-5));
+					imageDiv.replaceChild(img, imageDiv.childNodes[0]);
+				}
+				if(num != 9 && deck[num-1].clicked == true){
+					
+					deck[(num-7)].clickable = true;
+					//c.innerHTML += '<div id="card_'+(num-6)+'" onclick="clickCard('+(num-7)+')"><img src="images/'+deck[num-7].suit+deck[num-7].rank+'.gif" ></div>';
+					
+					var img = document.createElement("IMG");
+					img.src = "images/"+deck[num-7].suit+deck[num-7].rank+".gif";
+					document.getElementById('card_'+(num-6)).appendChild(img);
+					var imageDiv = document.getElementById('card_'+(num-6));
+					imageDiv.replaceChild(img, imageDiv.childNodes[0]);
+				}
+			}
+			else if(num>11&&num<15){
+			
+				if(num != 14 && deck[num+1].clicked == true){
+					
+					deck[(num-7)].clickable = true;
+					//c.innerHTML += '<div id="card_'+(num-6)+'" onclick="clickCard('+(num-7)+')"><img src="images/'+deck[num-7].suit+deck[num-7].rank+'.gif" ></div>';
+				
+					var img = document.createElement("IMG");
+					img.src = "images/"+deck[num-7].suit+deck[num-7].rank+".gif";
+					document.getElementById('card_'+(num-6)).appendChild(img);
+					var imageDiv = document.getElementById('card_'+(num-6));
+					imageDiv.replaceChild(img, imageDiv.childNodes[0]);
+				}
+				if(num != 12 && deck[num-1].clicked == true){
+				
+					deck[(num-8)].clickable = true;
+					//c.innerHTML += '<div id="card_'+(num-7)+'" onclick="clickCard('+(num-8)+')"><img src="images/'+deck[num-8].suit+deck[num-8].rank+'.gif" ></div>';
+					var img = document.createElement("IMG");
+					img.src = "images/"+deck[num-8].suit+deck[num-8].rank+".gif";
+					document.getElementById('card_'+(num-7)).appendChild(img);
+					var imageDiv = document.getElementById('card_'+(num-7));
+					imageDiv.replaceChild(img, imageDiv.childNodes[0]);
+				}
+			}
+			else if(num>14&&num<18){
+			
+				if(num != 17 && deck[num+1].clicked == true){
+					
+					deck[(num-8)].clickable = true;
+					//c.innerHTML += '<div id="card_'+(num-7)+'" onclick="clickCard('+(num-8)+')"><img src="images/'+deck[num-8].suit+deck[num-8].rank+'.gif" ></div>';
+					var img = document.createElement("IMG");
+					img.src = "images/"+deck[num-8].suit+deck[num-8].rank+".gif";
+					document.getElementById('card_'+(num-7)).appendChild(img);
+					var imageDiv = document.getElementById('card_'+(num-7));
+					imageDiv.replaceChild(img, imageDiv.childNodes[0]);
+				}
+				if(num != 15 && deck[num-1].clicked == true){
+					
+					deck[(num-9)].clickable = true;
+					//c.innerHTML += '<div id="card_'+(num-8)+'" onclick="clickCard('+(num-9)+')"><img src="images/'+deck[num-9].suit+deck[num-9].rank+'.gif" ></div>';
+					var img = document.createElement("IMG");
+					img.src = "images/"+deck[num-9].suit+deck[num-9].rank+".gif";
+					document.getElementById('card_'+(num-8)).appendChild(img);
+					var imageDiv = document.getElementById('card_'+(num-8));
+					imageDiv.replaceChild(img, imageDiv.childNodes[0]);
+				}
+			}
+			
+			//Deal with 2nd row
+			else if(num==3||num==4){
+
+				if((num == 3 && deck[4].clicked == true)||(num == 4 && deck[3].clicked == true)){
+					deck[0].clickable = true;
+					//c.innerHTML += '<div id="card_'+(1)+'" onclick="clickCard('+(0)+')"><img src="images/'+deck[0].suit+deck[0].rank+'.gif" ></div>';
+					var img = document.createElement("IMG");
+					img.src = "images/"+deck[0].suit+deck[0].rank+".gif";
+					document.getElementById('card_'+(1)).appendChild(img);
+					var imageDiv = document.getElementById('card_'+(1));
+					imageDiv.replaceChild(img, imageDiv.childNodes[0]);
+				}
+			}
+			else if(num==5||num==6){
+
+				if((num == 5 && deck[6].clicked == true)||(num == 6 && deck[5].clicked == true)){
+					deck[1].clickable = true;
+					//c.innerHTML += '<div id="card_'+(2)+'" onclick="clickCard('+(1)+')"><img src="images/'+deck[1].suit+deck[1].rank+'.gif" ></div>';
+					var img = document.createElement("IMG");
+					img.src = "images/"+deck[1].suit+deck[1].rank+".gif";
+					document.getElementById('card_'+(2)).appendChild(img);
+					var imageDiv = document.getElementById('card_'+(2));
+					imageDiv.replaceChild(img, imageDiv.childNodes[0]);
+				}
+			}
+			else if(num==7||num==8){
+
+				if((num == 7 && deck[8].clicked == true)||(num == 8 && deck[7].clicked == true)){
+					deck[2].clickable = true;
+					//c.innerHTML += '<div id="card_'+(3)+'" onclick="clickCard('+(2)+')"><img src="images/'+deck[2].suit+deck[2].rank+'.gif" ></div>';
+					var img = document.createElement("IMG");
+					img.src = "images/"+deck[2].suit+deck[2].rank+".gif";
+					document.getElementById('card_'+(3)).appendChild(img);
+					var imageDiv = document.getElementById('card_'+(3));
+					imageDiv.replaceChild(img, imageDiv.childNodes[0]);
+				}
+			}
+		}
+	}
+	document.getElementById("scoreDisplay").innerText = "Score: "+score;
+	
+	
+	console.log("Peak cards clicked: " +topCardsClicked);
+	if(topCardsClicked == 28){ //check to see if all of the cards on play field are gone
+		console.log("~~~~~~~~~~~~~~~~~~~~~~~~~YOU WON!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		window.alert("Congratulations! You won with a score of "+score+" points");
+		for(n=0; n<52; n++){
+			if(deck[n].clickable==true){
+				
+				deck[n].clickable = false;
+				
+			}
+		}
+	}
+	else if(cardsDrawn == 23){ //check to see if draw pile is empty
+		var n;
+		var someLeft = false;
+		for(n=0; n<28; n++){
+			if((deck[n].clickable==true)&&
+				(((Math.abs((deck[n].rank%13)-(playCard.rank%13))==1)||(deck[n].rank==13&&playCard.rank==12)||(deck[n].rank==12&&playCard.rank==13)))){
+				
+				someLeft = true;
+				
+			}
+		}
+		if(someLeft == false){
+			window.alert("You lost because there are no more available plays. Maybe you'll do better next time! You're score was "+score);
+		}
+	}
+}
+
+//make the card you just clicked disappear
+function hideCard(num){
+	var c = document.getElementById('container');
+	document.getElementById('card_'+(num)).style.visibility='hidden';	
+	console.log("hid card_"+num);
 }
 	
+//create a new game	
 function newGame(){
-	var deck = [];
-	populateDeck(deck);
-	shuffle(deck);
-	displayDeck(deck);
+	populateDeck();
+	shuffle();
+	displayDeck();
+}
+
+// deep copy function - used to make backup of array for replay
+// credit: tfmontague
+// site: http://stackoverflow.com/questions/7486085/copying-array-by-value-in-javascript
+function copy(o) {
+   var out, v, key;
+   out = Array.isArray(o) ? [] : {};
+   for (key in o) {
+       v = o[key];
+       out[key] = (typeof v === "object") ? copy(v) : v;
+   }
+   return out;
+}
+
+//clear the play field completely
+function clearGame(){
+	var c = document.getElementById('container');
+	c.innerHTML = "";
+}
+
+//replay game with the same deck as before
+function replayGame(){
+	console.log("Replaying game with the same cards");
+
+	deck = copy(backupDeck);
+	playCard = deck[51];
+	drawCard = deck[50];
+	clearGame();
+	displayDeck();
 	
-	var playCard = deck[51];
+	cardsDrawn = 0;
+	topCardsClicked = 0;
+	score = 0;
+	combo = false;
+	comboNum = 0;
 }
