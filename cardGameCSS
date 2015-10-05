@@ -8,6 +8,10 @@ div#container{
 	margin:0px auto;
 }
 
+div#scoreDisplay{
+
+}
+
 /*---------------Begin 1st Row---------------*/
 div#card_1{
 	background-image: url(images/b2fv.gif);
